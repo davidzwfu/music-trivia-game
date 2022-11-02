@@ -1,0 +1,150 @@
+<div class="body">
+    <section *ngIf="!loading" class="music-page">
+        <div @fadeIn class="music__cards" [class.music__cards--options]="options">
+            <div *ngIf="options" class="card card--options">
+                <div class="modal__header">
+                    <h2 class="modal__header__text">
+                        Search options
+                    </h2>
+                </div>
+                <form class="modal__form" #form1="ngForm">
+                    <div class="modal__form__row">
+                        <div class="input-field">
+                            <select class="input-field__select" name="_type" type="text" [(ngModel)]="type" required>
+                                <option>Artist</option>
+                                <option>Year</option>
+                                <option>User top</option>
+                            </select>
+                            <input class="input-field__text" name="_type" [ngModel]="type" type="text" placeholder=" " tabindex="-1" readonly required>
+                            <svg class="input-field__arrow" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+                            </svg>
+                            <label class="input-field__label">Type</label>
+                            <div class="input-field__unfocused-border"></div>
+                            <div class="input-field__focused-border"></div>
+                        </div>
+                        <div *ngIf="type != 'User top'" class="input-field">
+                            <input class="input-field__text" name="genre" [(ngModel)]="genre" type="text" placeholder=" " required>
+                            <label class="input-field__label">Genre</label>
+                            <div class="input-field__unfocused-border"></div>
+                            <div class="input-field__focused-border"></div>
+                        </div>
+                        <div *ngIf="type == 'User top'" class="input-field">
+                            <select class="input-field__select" name="timeRange" type="text" [(ngModel)]="timeRange" required>
+                                <option value="short_term">Short term (4 weeks)</option>
+                                <option value="medium_term">Medium term (6 months)</option>
+                                <option value="long_term">Long term (All time)</option>
+                            </select>
+                            <input class="input-field__text" name="timeRange" [ngModel]="timeRange" type="text" placeholder=" " tabindex="-1" readonly required>
+                            <svg class="input-field__arrow" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+                            </svg>
+                            <label class="input-field__label">Time Range</label>
+                            <div class="input-field__unfocused-border"></div>
+                            <div class="input-field__focused-border"></div>
+                        </div>
+                    </div>
+                    <div class="modal__form__row">
+                        <div *ngIf="type != 'Year'" class="input-field">
+                            <input class="input-field__text" name="artistLimit" [(ngModel)]="artistLimit" type="number" placeholder=" " required>
+                            <label class="input-field__label"># of artists</label>
+                            <div class="input-field__unfocused-border"></div>
+                            <div class="input-field__focused-border"></div>
+                        </div>
+                        <div *ngIf="type == 'Year'" class="input-field">
+                            <input class="input-field__text input-field__text--age" name="minYear" [(ngModel)]="minYear" type="number" placeholder=" " required>
+                            <div class="input-field__dash">&ndash;</div>
+                            <input class="input-field__text input-field__text--age" name="maxYear" [(ngModel)]="maxYear" type="number" placeholder=" " required>
+                            <label class="input-field__label">Year</label>
+                            <div class="input-field__unfocused-border"></div>
+                            <div class="input-field__focused-border"></div>
+                        </div>
+                        <div class="input-field">
+                            <input class="input-field__text" name="trackLimit" [(ngModel)]="trackLimit" type="number" placeholder=" " required>
+                            <label class="input-field__label">Tracks per artist</label>
+                            <div class="input-field__unfocused-border"></div>
+                            <div class="input-field__focused-border"></div>
+                        </div>
+                    </div>
+                    <div class="modal__form__row">
+                        <div *ngIf="type == 'User top'" class="input-field">
+                            <input class="input-field__text" name="topTrackLimit" [(ngModel)]="topTrackLimit" type="number" placeholder=" " required>
+                            <label class="input-field__label"># of top tracks</label>
+                            <div class="input-field__unfocused-border"></div>
+                            <div class="input-field__focused-border"></div>
+                        </div>
+                        <div *ngIf="type == 'Artist'" class="input-field">
+                            <input class="input-field__text input-field__text--age" name="minExclude" [(ngModel)]="minExclude" type="number" placeholder=" " >
+                            <div class="input-field__dash">&ndash;</div>
+                            <input class="input-field__text input-field__text--age" name="maxExclude" [(ngModel)]="maxExclude" type="number" placeholder=" " >
+                            <label class="input-field__label">Exclude year</label>
+                            <div class="input-field__unfocused-border"></div>
+                            <div class="input-field__focused-border"></div>
+                        </div>
+                        <div class="input-field"></div>
+                    </div>
+                </form>
+                <div class="modal__footer">
+                    <div class="align-right display-flex">
+                        <button class="button button--primary" type="button" (click)="submitOptions()" [disabled]="!form1.valid">
+                            <div [class.invisible]="submitted">Search music</div>
+                            <div *ngIf="submitted" class="mini-loader"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div @fadeIn *ngFor="let card of cards" class="card" (click)="onClick(card)" [class.selected]="selected == card || selected == null"
+                [class.card--selected]="selected == card">
+                <div class="card__container card__container--centered">
+                    <div @fadeIn *ngIf="selected == card" class="card__image-div">
+                        <img @fadeIn class="card__image" [attr.src]="card.image" *ngIf="(!card.year || showAnswer) && card.image != ''">
+                        <div class="card__overlay"></div>
+                    </div>
+                    <ng-container *ngIf="selected == card">
+                        <div @fadeIn *ngIf="showAnswer == true" class="card__answer" (click)="revealAnswer()">{{card.answer}}</div>
+                        <button @fadeIn *ngIf="showAnswer == false" class="button button--borderless button--secondary card__answer"
+                            (click)="revealAnswer()">
+                            .....
+                        </button>
+                    </ng-container>
+                    <div class="card__title" [class.title--selected]="selected == card" >
+                        <ng-container *ngIf="card.artist; then artist; else year"></ng-container>
+                        <ng-template #artist>{{card.artist.name}}</ng-template>
+                        <ng-template #year>{{card.year}}</ng-template>
+                    </div>
+                    <div *ngIf="selected == card" class="card__controls">
+                        <button @fadeIn class="button button--borderless button--secondary card__button"
+                            (click)="close(card)">
+                            <svg class="card__button__icon" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                            </svg>
+                        </button>
+                        <button @fadeIn *ngIf="card.paused == false" class="button button--borderless button--secondary card__button"
+                            (click)="pause(card)">
+                            <svg class="card__button__icon" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+                            </svg>
+                        </button>
+                        <button @fadeIn *ngIf="card.paused == true" class="button button--borderless button--secondary card__button"
+                            (click)="resume(card)">
+                            <svg class="card__button__icon" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                            </svg>
+                        </button>
+                        <svg class="button__progress-ring button--absolute" [attr.style]="'height:'+radius*2+'px; width:'+radius*2+'px'">
+                            <circle @play *ngIf="progress != 0" [attr.stroke-dasharray]="circumference+' '+circumference" [attr.stroke-width]="stroke" [attr.r]="normalizedRadius" [attr.cx]="radius" 
+                            [attr.cy]="radius" [attr.style]="'stroke-dashoffset:'+offset" />
+                        </svg>
+                        <button @fadeIn class="button button--borderless button--secondary card__button"
+                            (click)="nextSong(card)">
+                            <svg class="card__button__icon" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M16,18H18V6H16M6,18L14.5,12L6,6V18Z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <button class="button button--primary" style="margin: auto; width: 80px" (click)="next()">Next</button> -->
+    </section>
+</div>
